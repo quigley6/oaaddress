@@ -5880,8 +5880,8 @@ body { font-family: Arial; }
 		<div class="menu" id="menu">
 			<div class="tab selected" id="singlewallet" onclick="ninja.tabSwitch(this);">Single Wallet</div>
 			<div class="tab" id="paperwallet" onclick="ninja.tabSwitch(this);">Paper Wallet</div>
-			<div class="tab" id="bulkwallet" onclick="ninja.tabSwitch(this);">OpenAsset Address</div>
-			<div class="tab" id="brainwallet" onclick="ninja.tabSwitch(this);">Brain Wallet</div>
+			<div class="tab" id="bulkwallet" onclick="ninja.tabSwitch(this);">BTC -> OA Address</div>
+			<div class="tab" id="brainwallet" onclick="ninja.tabSwitch(this);">OA -> BTC Address</div>
 			<div class="tab" id="vanitywallet" onclick="ninja.tabSwitch(this);">Vanity Wallet</div>
 			<div class="tab" id="detailwallet" onclick="ninja.tabSwitch(this);">Wallet Details</div>
 		</div>
@@ -5952,46 +5952,24 @@ body { font-family: Arial; }
 			<div id="bulkarea" class="walletarea">
 				<div class="commands">
 					<div id="bulkcommands" class="row">
-						<span><label id="bulklabelstartindex">Bitcoin Address: </label> <input type="text" id="oabitcoinaddress" value=" " /> <input type="button" id="openaddressbutton" value="Generate" onClick="ninja.wallets.bulkwallet.genOA();" /></span><p>
+						<span><label id="bulklabelstartindex">Bitcoin Address: </label> <input type="text" id="btc_to_oa_address" value=" " /> <input type="button" id="openaddressbutton" value="Generate" onClick="ninja.wallets.bulkwallet.genOA();" /></span><p>
 						
 					</div>
 					<div id="oaarea" class="row">
-						<span><label>OpenAsset Address: </label> <span class="output" id="oaaddress"></span></span>
+						<span><label>OpenAsset Address: </label> <span class="output" id="btc_to_oa_output"></span></span>
 					</div>
 				</div>
 				
 			</div>
 			
 			<div id="brainarea" class="walletarea">
-				<div id="braincommands" class="commands">
-					<div class="row">
-						<span id="brainlabelenterpassphrase" class="label">Enter Passphrase: </span>
-						<input tabindex="1" type="password" id="brainpassphrase" value="" onfocus="this.select();" onkeypress="if (event.keyCode == 13) ninja.wallets.brainwallet.view();" />
-						<span><label id="brainlabelshow">Show?</label> <input type="checkbox" id="brainpassphraseshow" onchange="ninja.wallets.brainwallet.showToggle(this);" /></span>
-						<span class="print"><input type="button" name="print" id="brainprint" value="Print" onclick="window.print();" /></span>
+				<div class="commands">
+					<div id="bulkcommands" class="row">
+						<span><label id="bulklabelstartindex">OpenAsset Address: </label> <input type="text" id="oa_to_btc_address" value=" " /> <input type="button" id="openaddressbutton" value="Generate" onClick="ninja.wallets.brainwallet.genBTC();" /></span><p>
+						
 					</div>
-					<div class="row extra">
-						<span class="label" id="brainlabelconfirm">Confirm Passphrase: </span>
-						<input tabindex="2" type="password" id="brainpassphraseconfirm" value="" onfocus="this.select();" onkeypress="if (event.keyCode == 13) ninja.wallets.brainwallet.view();" />
-						<span><input tabindex="3" type="button" id="brainview" value="View" onclick="ninja.wallets.brainwallet.view();" /></span>
-						<span id="brainalgorithm" class="notes right">Algorithm: SHA256(passphrase)</span>
-					</div>
-					<div class="row extra"><span id="brainwarning"></span></div>
-				</div>
-				<div id="brainkeyarea" class="keyarea">
-					<div class="public">
-						<div id="brainqrcodepublic" class="qrcode_public"></div>
-						<div class="pubaddress">
-							<span class="label" id="brainlabelbitcoinaddress">Bitcoin Address:</span>
-							<span class="output" id="brainbtcaddress"></span>
-						</div>
-					</div>
-					<div class="private">
-						<div id="brainqrcodeprivate" class="qrcode_private"></div>
-						<div class="privwif">
-							<span class="label" id="brainlabelprivatekey">Private Key (Wallet Import Format):</span>
-							<span class="output" id="brainbtcprivwif"></span>
-						</div>
+					<div id="oaarea" class="row">
+						<span><label>Bitcoin Address: </label> <span class="output" id="oa_to_btc_output"></span></span>
 					</div>
 				</div>
 			</div>
@@ -7472,14 +7450,14 @@ ninja.wallets.bulkwallet = {
 	},
 	
 	genOA: function () {
-		var btcaddress = document.getElementById('oabitcoinaddress').value;
+		var btcaddress = document.getElementById('btc_to_oa_address').value;
 		var d = Bitcoin.Base58.decode(btcaddress.trim());
 		d.unshift(19);
 		var e = d.slice(0, -4);
 		var check = Bitcoin.Util.dsha256(e).slice(0, 4);
 		f = e.concat(check);
 		var openassetAddress = Bitcoin.Base58.encode(f);
-		document.getElementById('oaaddress').innerHTML = openassetAddress;
+		document.getElementById('btc_to_oa_output').innerHTML = openassetAddress;
 	},
 
 	// use this function to bulk generate addresses
@@ -7552,6 +7530,17 @@ ninja.wallets.brainwallet = {
 
 	close: function () {
 		document.getElementById("brainarea").style.display = "none";
+	},
+	
+	genBTC: function () {
+		var oaaddress = document.getElementById('oa_to_btc_address').value;
+		var d = Bitcoin.Base58.decode(oaaddress.trim());
+		d.shift()
+		var e = d.slice(0, -4);
+		var check = Bitcoin.Util.dsha256(e).slice(0, 4);
+		f = e.concat(check);
+		var bitcoinAddress = Bitcoin.Base58.encode(f);
+		document.getElementById('oa_to_btc_output').innerHTML = bitcoinAddress;
 	},
 
 	minPassphraseLength: 15,
